@@ -1,1 +1,4 @@
+# environement variables
+
 .env
+.env.migrations
