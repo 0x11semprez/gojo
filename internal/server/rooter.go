@@ -1,5 +1,13 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
 
-var mux http.Handler = http.NewServeMux()
+	"gojo/internal/user"
+)
+
+var mux = http.NewServeMux()
+
+func Run() {
+	mux.HandleFunc("GET /health", user.Health)
+}
