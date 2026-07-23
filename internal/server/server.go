@@ -12,11 +12,11 @@ type Server struct {
 	*http.Server
 }
 
-func NewServe(c *app.Config, handler http.Handler) Server {
+func NewServe(c *app.Config) Server {
 	return Server{
 		&http.Server{
 			Addr:              c.Port,
-			Handler:           handler,
+			Handler:           mux,
 			ReadTimeout:       5 * time.Second,
 			ReadHeaderTimeout: 2 * time.Second,
 			WriteTimeout:      5 * time.Second,
@@ -27,7 +27,7 @@ func NewServe(c *app.Config, handler http.Handler) Server {
 }
 
 func StartServer(s *Server) {
-	err := http.ListenAndServe(s.Addr, s.Handler)
+	err := http.ListenAndServe(s.Addr, mux)
 	if err != nil {
 		log.Fatal(err)
 	}
