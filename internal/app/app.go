@@ -1,9 +1,20 @@
 package app
 
-import "net/http"
+import (
+	"database/sql"
+	"net/http"
+)
 
 type App struct {
 	Server   *http.Server
-	Database *sql.db
-	Config   Config
+	Database *sql.DB
+	Config   *Config
+}
+
+func NewApp(s *http.Server, db *sql.DB, c *Config) *App {
+	return &App{
+		Server:   s,
+		Database: db,
+		Config:   c,
+	}
 }
