@@ -1,3 +1,4 @@
+```mermaid
 flowchart LR
 
 User[User]
@@ -9,3 +10,4 @@ Bitcoin[Bitcoin Network]
 User -->|Commands| System
 
 System -->|Broadcast transactions| Bitcoin
+```
