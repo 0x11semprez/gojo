@@ -1,8 +1,6 @@
 package main
 
 import (
-	"net/http"
-
 	"gojo/internal/app"
 	"gojo/internal/server"
 )
@@ -10,9 +8,9 @@ import (
 func main() {
 	config := app.NewConfig()
 
-	mux := http.NewServeMux()
+	s := server.NewServe(config)
 
-	s := server.NewServe(config, mux)
+	server.Run()
 
 	server.StartServer(&s)
 }
