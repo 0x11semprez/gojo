@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"time"
 
-	"gojo/internal/app"
+	"gojo/internal/config"
 )
 
 type Server struct {
 	*http.Server
 }
 
-func NewServe(c *app.Config) Server {
+func NewServe(c *config.Config) Server {
 	return Server{
 		&http.Server{
 			Addr:              c.Port,
