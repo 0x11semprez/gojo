@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"log"
 
-	"gojo/internal/app"
+	"gojo/internal/config"
 )
 
-func connectDB(databaseURL *app.App) {
-	db, err := sql.Open("postgres", databaseURL.Config.DatabaseUrl)
+func ConnectDB(databaseURL *config.Config) (*sql.DB, error) {
+	db, err := sql.Open("postgres", databaseURL.DatabaseUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -17,4 +17,6 @@ func connectDB(databaseURL *app.App) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	return db, err
 }

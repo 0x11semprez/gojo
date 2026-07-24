@@ -2,16 +2,18 @@ package app
 
 import (
 	"database/sql"
-	"net/http"
+
+	"gojo/internal/config"
+	"gojo/internal/server"
 )
 
 type App struct {
-	Server   *http.Server
+	Server   *server.Server
 	Database *sql.DB
-	Config   *Config
+	Config   *config.Config
 }
 
-func NewApp(s *http.Server, db *sql.DB, c *Config) *App {
+func NewApp(s *server.Server, db *sql.DB, c *config.Config) *App {
 	return &App{
 		Server:   s,
 		Database: db,
