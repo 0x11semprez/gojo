@@ -5,11 +5,11 @@ import (
 	"encoding/hex"
 )
 
-func GeneratePassword() string {
+func GeneratePassword() (string, error) {
 	b := make([]byte, 32)
 	rand.Read(b)
 
 	secret := hex.EncodeToString(b)
 
-	return secret
+	return secret, nil
 }
