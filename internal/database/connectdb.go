@@ -2,21 +2,16 @@ package database
 
 import (
 	"database/sql"
-	"log"
 
-	"gojo/internal/config"
+	"gojo/internal/app"
+
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/driver/pgdriver"
 )
 
-func ConnectDB(databaseURL *config.Config) (*sql.DB, error) {
-	db, err := sql.Open("postgres", databaseURL.DatabaseUrl)
-	if err != nil {
-		log.Fatal(err)
-	}
+func ConnectDB(dsn *app.App) *bun.DB {
+	pgdb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn.Config.DatabaseURL)))
 
-	err = db.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return db, err
+	return bun.NewDB(pgdb, pgdialect.New())
 }
