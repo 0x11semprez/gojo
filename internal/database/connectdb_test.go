@@ -1,20 +1,30 @@
 package database
 
 import (
+	"context"
 	"log"
 	"testing"
+	"time"
 
-	"gojo/internal/app"
 	"gojo/internal/config"
-	"gojo/internal/server"
 )
 
 func TestConnectDb(t *testing.T) {
-	config := config.NewConfig()
-	s := server.NewServe(config)
+	config, err := config.NewConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 	db, err := ConnectDB(config)
 	if err != nil {
 		log.Fatal(err)
 	}
-	app := app.NewApp(&s, db, config)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	testdb := db.PingContext(ctx)
+
+	if testdb != nil {
+		t.Fatal(testdb)
+	}
 }
