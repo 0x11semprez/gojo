@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"gojo/internal/app"
+	"gojo/internal/config"
 
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
@@ -17,23 +17,17 @@ import (
 // It returns:
 //   - *bun.DB: the Bun database instance used for queries
 //   - error: an error if the configuration or connection setup fails
-func ConnectDB(dsn *app.App) (*bun.DB, error) {
-	// Check if the application instance exists.
-	// A nil pointer means no application configuration was provided.
+func ConnectDB(dsn *config.Config) (*bun.DB, error) {
+	// Check if the dsn instance exists.
+	// A nil pointer means no dsn configuration was provided.
 	if dsn == nil {
 		return nil, errors.New("app is nil")
 	}
 
-	// Check if the configuration object exists.
-	// Without it, we cannot access the database URL.
-	if dsn.Config == nil {
-		return nil, errors.New("app config is nil")
-	}
-
-	// Check if the database connection string is configured.
-	// The DSN contains information such as:
+	// Check if the databaseURL string is configured.
+	// The databaseURL contains information such as:
 	// postgres://user:password@host:port/database
-	if dsn.Config.DatabaseURL == "" {
+	if dsn.DatabaseURL == "" {
 		return nil, errors.New("database URL is empty")
 	}
 
@@ -42,7 +36,7 @@ func ConnectDB(dsn *app.App) (*bun.DB, error) {
 	// connections are created lazily when queries are executed.
 	pgdb := sql.OpenDB(
 		pgdriver.NewConnector(
-			pgdriver.WithDSN(dsn.Config.DatabaseURL),
+			pgdriver.WithDSN(dsn.DatabaseURL),
 		),
 	)
 
