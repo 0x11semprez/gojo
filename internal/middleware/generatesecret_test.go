@@ -1,22 +1,26 @@
 package middleware
 
-import "testing"
+import (
+	"encoding/hex"
+	"testing"
+)
 
 func TestGenerateSecret(t *testing.T) {
-	secret, err := GeneratePassword()
+	// Verify that the generated secret decodes to the expected size.
+	// The generator returns a hexadecimal representation of 32 random bytes.
+	generate, err := GeneratePassword()
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
-	want := make([]byte, 32)
+	got, err := hex.DecodeString(generate)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	if want != btoa(secret) {
-		t.Errorf("%d something different with %v", want, secret)
+	want := 32
+
+	if len(got) != want {
+		t.Errorf("invalid secret length: got %d bytes, want %d", len(got), want)
 	}
 }
-
-func btoa(sentence *string) []byte {
-}
-
-// we put a string and then we have an array of byte
-// I need to create a function that take the string, remove "", put one letter by one letter in the test
