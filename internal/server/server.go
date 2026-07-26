@@ -12,8 +12,8 @@ type Server struct {
 	*http.Server
 }
 
-func NewServe(c *config.Config) Server {
-	return Server{
+func NewServe(c *config.Config) *Server {
+	return &Server{
 		&http.Server{
 			Addr:              c.Port,
 			Handler:           mux,
