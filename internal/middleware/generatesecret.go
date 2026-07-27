@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 )
 
-func GeneratePassword() (string, error) {
+func GenerateSecret() (string, error) {
 	b := make([]byte, 32)
 	rand.Read(b)
 
