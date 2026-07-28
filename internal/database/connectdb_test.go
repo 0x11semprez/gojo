@@ -9,11 +9,11 @@ import (
 )
 
 func TestConnectDb(t *testing.T) {
-	config, err := config.NewConfig()
+	cfg, err := config.NewConfig()
 	if err != nil {
 		t.Fatal(err)
 	}
-	db, err := ConnectDB(config)
+	db, err := ConnectDB(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -21,9 +21,7 @@ func TestConnectDb(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	testdb := db.PingContext(ctx)
-
-	if testdb != nil {
-		t.Fatal(testdb)
+	if err := db.PingContext(ctx); err != nil {
+		t.Fatal(err)
 	}
 }

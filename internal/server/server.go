@@ -12,7 +12,7 @@ type Server struct {
 	*http.Server
 }
 
-func NewServe(c *config.Config) *Server {
+func NewServe(c *config.Config) (*Server, error) {
 	return &Server{
 		&http.Server{
 			Addr:              c.Port,
@@ -23,7 +23,7 @@ func NewServe(c *config.Config) *Server {
 			IdleTimeout:       60 * time.Second,
 			MaxHeaderBytes:    1 << 20,
 		},
-	}
+	}, nil
 }
 
 func StartServer(s *Server) {
