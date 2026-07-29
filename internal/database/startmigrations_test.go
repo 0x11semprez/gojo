@@ -7,7 +7,7 @@ import (
 )
 
 func TestStartMigrations(t *testing.T) {
-	cfg, err := config.NewConfig()
+	cfg, err := config.NewConfigTest()
 	if err != nil {
 		t.Errorf("error with cfg")
 	}
