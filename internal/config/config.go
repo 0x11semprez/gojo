@@ -8,8 +8,10 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string
-	Port        string
+	DatabaseURL          string
+	DatabaseURLMigration string
+	Port                 string
+	Jwt                  string
 }
 
 func NewConfig() (*Config, error) {
@@ -18,7 +20,9 @@ func NewConfig() (*Config, error) {
 		return nil, errors.New("error loading .env file")
 	}
 	return &Config{
-		DatabaseURL: os.Getenv("DATABASE_URL"),
-		Port:        os.Getenv("PORT"),
+		DatabaseURL:          os.Getenv("DATABASE_URL"),
+		DatabaseURLMigration: os.Getenv("DatabaseURLMigration"),
+		Port:                 os.Getenv("PORT"),
+		Jwt:                  os.Getenv("JWT_TOKEN"),
 	}, nil
 }
