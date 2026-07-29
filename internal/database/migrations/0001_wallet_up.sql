@@ -16,4 +16,4 @@ CREATE TABLE IF NOT EXISTS wallet (
   deleted_at TIMESTAMPTZ,
 
   FOREIGN KEY (user_id) REFERENCES users(id),
-)
+);
