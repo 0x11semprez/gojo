@@ -1,12 +1,14 @@
 package database
 
 import (
+	"errors"
 	"log"
 
 	"gojo/internal/config"
 
-	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func StartMigrations(cfg *config.Config) {
@@ -15,7 +17,7 @@ func StartMigrations(cfg *config.Config) {
 		log.Fatal(err)
 	}
 
-	if err := migration.Up(); err != nil && migrate.ErrNoChange {
+	if err := migration.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		log.Fatal(err)
 	}
 }
