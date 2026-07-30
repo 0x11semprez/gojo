@@ -36,3 +36,17 @@ func CreateUser(db *app.App) (string, error) {
 
 	return secret, nil
 }
+
+func DeleteUser(db *app.App, secret string) (string, error) {
+	var selectedUser User
+
+	ctx := context.Background()
+
+	_, err := db.Database.NewDelete().Model(selectedUser).Where("secret = ?", secret).Exec(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sucess := "user is delete"
+	return sucess, nil
+}
