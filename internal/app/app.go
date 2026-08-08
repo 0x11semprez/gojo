@@ -13,7 +13,7 @@ type App struct {
 	Config   *config.Config
 }
 
-func NewApp(s *server.Server, db *bun.DB, c *config.Config) *App {
+func (a App) NewApp(s *server.Server, db *bun.DB, c *config.Config) *App {
 	return &App{
 		Server:   s,
 		Database: db,
