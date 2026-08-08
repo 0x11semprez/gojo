@@ -16,7 +16,7 @@ type Config struct {
 	Jwt                      string
 }
 
-func NewConfig() (*Config, error) {
+func (c Config) NewConfig() (*Config, error) {
 	err := godotenv.Load("../../.env")
 	if err != nil {
 		return nil, errors.New("error loading .env file")
@@ -29,7 +29,7 @@ func NewConfig() (*Config, error) {
 	}, nil
 }
 
-func NewConfigTest() (*Config, error) {
+func (c Config) NewConfigTest() (*Config, error) {
 	err := godotenv.Load("../../.env")
 	if err != nil {
 		return nil, errors.New("error loading .env.test file")
