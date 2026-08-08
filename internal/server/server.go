@@ -12,7 +12,7 @@ type Server struct {
 	*http.Server
 }
 
-func NewServe(c *config.Config) (*Server, error) {
+func (s Server) NewServe(c *config.Config) (*Server, error) {
 	return &Server{
 		&http.Server{
 			Addr:              c.Port,
@@ -26,7 +26,7 @@ func NewServe(c *config.Config) (*Server, error) {
 	}, nil
 }
 
-func StartServer(s *Server) {
+func (serv Server) StartServer(s *Server) {
 	err := http.ListenAndServe(s.Addr, mux)
 	if err != nil {
 		log.Fatal(err)
