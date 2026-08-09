@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"net/http"
 	"time"
 
@@ -12,7 +11,7 @@ type Server struct {
 	*http.Server
 }
 
-func (s Server) NewServe(c *config.Config) (*Server, error) {
+func NewServe(c *config.Config, mux http.Handler) (*Server, error) {
 	return &Server{
 		&http.Server{
 			Addr:              c.Port,
@@ -24,11 +23,4 @@ func (s Server) NewServe(c *config.Config) (*Server, error) {
 			MaxHeaderBytes:    1 << 20,
 		},
 	}, nil
-}
-
-func (serv Server) StartServer(s *Server) {
-	err := http.ListenAndServe(s.Addr, mux)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
