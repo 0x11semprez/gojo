@@ -14,10 +14,10 @@ type Config struct {
 	Jwt                  string
 }
 
-func (c Config) New() (*Config, error) {
+func NewConfig() (*Config, error) {
 	err := godotenv.Load("../../.env")
 	if err != nil {
-		return nil, errors.New("cannot laod .env file")
+		return nil, errors.New("cannot load	.env file")
 	}
 	return &Config{
 		DatabaseURL:          os.Getenv("DATABASE_URL"),
