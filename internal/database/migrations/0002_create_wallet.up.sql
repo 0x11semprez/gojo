@@ -1,0 +1,19 @@
+CREATE TABLE IF NOT EXISTS wallet (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  user_id UUID NOT NULL REFERENCES users(id),
+
+  name TEXT,
+
+  network TEXT NOT NULL,
+
+  private_key BYTEA NOT NULL UNIQUE,
+  public_key BYTEA NOT NULL UNIQUE,
+  address TEXT UNIQUE,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMPTZ
+);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON wallet TO gojo_api;
