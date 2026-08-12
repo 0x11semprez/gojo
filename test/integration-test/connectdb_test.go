@@ -9,10 +9,10 @@ import (
 	"gojo/internal/database"
 )
 
-// TestConnectDb est un test d'intégration qui vérifie que database.ConnectDB
-// ouvre une connexion fonctionnelle à la base de données réelle (config
-// chargée depuis .env) et que la connexion répond à un ping en moins de
-// 5 secondes.
+// TestConnectDb is an integration test that verifies database.ConnectDB
+// opens a working connection to the real database (config loaded
+// from .env) and that the connection responds to a ping within
+// 5 seconds.
 func TestConnectDb(t *testing.T) {
 	cfg, err := config.NewConfigTest()
 	if err != nil {

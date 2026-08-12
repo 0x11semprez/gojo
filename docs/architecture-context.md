@@ -3,11 +3,17 @@ flowchart LR
 
 User[User]
 
-System[Gojo Wallet System]
+API[Gojo API - Go]
 
-Bitcoin[Bitcoin Network]
+Generator[Key Generator - Rust: Bitcoin secp256k1, Monero ed25519]
 
-User -->|Commands| System
+DB[(PostgreSQL: encrypted keys and accounts)]
 
-System -->|Broadcast transactions| Bitcoin
+User -->|HTTP requests| API
+
+API -->|requests key material| Generator
+
+Generator -->|raw key, in memory only| API
+
+API -->|stores encrypted| DB
 ```

@@ -1,6 +1,6 @@
-// Package main est le point d'entrée de l'application gojo.
-// Il assemble la configuration, la base de données et le serveur HTTP,
-// puis démarre l'écoute des requêtes entrantes.
+// Package main is the entry point of the gojo application.
+// It wires together the configuration, the database and the HTTP server,
+// then starts listening for incoming requests.
 package main
 
 import (
@@ -13,24 +13,28 @@ import (
 )
 
 func main() {
-	// Charge la configuration (variables d'environnement via .env).
+	// Load the configuration (environment variables via .env).
 	cfg, err := config.NewConfig()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to load configuration: %v", err)
 	}
 
-	// mux est le routeur HTTP standard qui associera les chemins d'URL
-	// aux handlers (voir internal/user pour les handlers métier).
+	// mux is the standard HTTP router that maps URL paths
+	// to handlers (see internal/user for the business handlers).
 	mux := http.NewServeMux()
 	srv, err := server.NewServe(cfg, mux)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to initialize HTTP server: %v", err)
 	}
 
-	// Applique les migrations de base de données au démarrage,
-	// pour garantir que le schéma est à jour avant de servir des requêtes.
+	// Apply database migrations at startup, to guarantee the schema
+	// is up to date before serving any request.
 	database.StartMigrations(cfg)
 
-	// Démarre le serveur HTTP en mode bloquant.
-	srv.ListenAndServe()
+	log.Printf("server is running and listening on %s", cfg.Port)
+
+	// Start the HTTP server in blocking mode.
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("server stopped unexpectedly: %v", err)
+	}
 }

@@ -1,5 +1,5 @@
-// Package unit_test regroupe les tests unitaires ne nécessitant pas de
-// base de données réelle (contrairement au package integrationtest).
+// Package unit_test groups unit tests that do not require a real
+// database (unlike the integrationtest package).
 package unit_test
 
 import (
@@ -9,17 +9,17 @@ import (
 	"gojo/internal/config"
 )
 
-// TestNewConfig vérifie que config.NewConfig charge le fichier .env sans
-// erreur et affiche les valeurs Port/DatabaseURL/DatabaseURLMigration
-// obtenues pour une inspection visuelle ; il ne vérifie pas leur contenu.
+// TestNewConfig verifies that config.NewConfig loads the .env file
+// without error and prints the resulting Port/DatabaseURL/DatabaseURLMigration
+// values for visual inspection; it does not verify their content.
 func TestNewConfig(t *testing.T) {
 	cfg, err := config.NewConfig()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("failed to load configuration: %v", err)
 	}
 
-	fmt.Printf("thank you for testing config, this is crucial to launch our application\n")
-	fmt.Printf("your listening on port -> %q\n", cfg.Port)
-	fmt.Printf("your database url is -> %q\n", cfg.DatabaseURL)
-	fmt.Printf("your database url for migrations is -> %q\n", cfg.DatabaseURLMigration)
+	fmt.Printf("configuration loaded successfully, values below are ready for the application to start\n")
+	fmt.Printf("listening port is set to -> %q\n", cfg.Port)
+	fmt.Printf("database URL is set to -> %q\n", cfg.DatabaseURL)
+	fmt.Printf("database migration URL is set to -> %q\n", cfg.DatabaseURLMigration)
 }

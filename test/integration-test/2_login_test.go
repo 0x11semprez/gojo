@@ -12,12 +12,12 @@ import (
 	"gojo/internal/server"
 )
 
-// TestLogin est un test d'intégration qui démarre une vraie App contre la
-// base de données de test et exerce middleware.Login sur le compte "toj"
-// créé par TestCreateUser : le bon couple utilisateur/mot de passe
-// réussit, un nom d'utilisateur inconnu échoue, "toj" mal orthographié
-// échoue (comme un utilisateur inconnu), et le bon nom d'utilisateur avec
-// un mauvais mot de passe échoue.
+// TestLogin is an integration test that starts a real App against the
+// test database and exercises middleware.Login on the "toj" account
+// created by TestCreateUser: the correct username/password pair
+// succeeds, an unknown username fails, a misspelled "toj" fails (like
+// an unknown user), and the correct username with a wrong password
+// fails.
 func TestLogin(t *testing.T) {
 	cfg, err := config.NewConfigTest()
 	if err != nil {

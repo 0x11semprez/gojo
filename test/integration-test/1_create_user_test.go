@@ -12,21 +12,21 @@ import (
 	"gojo/internal/user"
 )
 
-// tojPassword est le mot de passe du compte de test "toj" créé ci-dessous.
-// TestLogin et TestDeleteUser réutilisent ce même compte "toj" au lieu
-// d'en créer un chacun, ils ont donc aussi besoin du mot de passe en clair.
-// Les tests de ce package s'exécutent dans l'ordre des fichiers (les
-// préfixes numériques l'imposent : 1_create, 2_login, 3_delete), donc
-// "toj" existe déjà quand ces tests s'exécutent, et TestDeleteUser ne le
-// supprime qu'une fois que TestLogin a fini de l'utiliser.
+// tojPassword is the password for the "toj" test account created below.
+// TestLogin and TestDeleteUser reuse this same "toj" account instead
+// of each creating one, so they also need the plaintext password.
+// Tests in this package run in file order (enforced by the numeric
+// prefixes: 1_create, 2_login, 3_delete), so "toj" already exists by
+// the time these tests run, and TestDeleteUser only removes it once
+// TestLogin is done using it.
 const tojPassword = "toj-integration-test-password"
 
-// TestCreateUser est un test d'intégration qui démarre une vraie App
-// (config + connexion base + serveur) et exerce user.CreateUser contre la
-// base de données réelle : création d'un utilisateur normal, création d'un
-// utilisateur avec un mot de passe vide (bcrypt hache sans problème une
-// chaîne vide, donc ce cas réussit -- il n'y a pas de validation côté
-// application qui le rejette), et rejet d'un nom d'utilisateur en double.
+// TestCreateUser is an integration test that starts a real App
+// (config + database connection + server) and exercises user.CreateUser
+// against the real database: creating a normal user, creating a user
+// with an empty password (bcrypt hashes an empty string without
+// issue, so this case succeeds -- there is no application-side
+// validation rejecting it), and rejecting a duplicate username.
 func TestCreateUser(t *testing.T) {
 	cfg, err := config.NewConfigTest()
 	if err != nil {
@@ -51,8 +51,8 @@ func TestCreateUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// rules décrit le scénario testé, wantErr indique si CreateUser est
-	// censé échouer pour ce scénario.
+	// rules describes the tested scenario, wantErr indicates whether
+	// CreateUser is expected to fail for this scenario.
 	tests := []struct {
 		rules    string
 		username string

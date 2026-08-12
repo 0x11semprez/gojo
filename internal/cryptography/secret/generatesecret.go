@@ -1,5 +1,5 @@
-// Package secret fournit des utilitaires de génération de valeurs
-// aléatoires cryptographiquement sûres (ex: secrets d'application).
+// Package secret provides utilities for generating cryptographically
+// secure random values (e.g. application secrets).
 package secret
 
 import (
@@ -7,10 +7,10 @@ import (
 	"encoding/hex"
 )
 
-// GenerateSecret génère un secret aléatoire de 32 octets (256 bits) à
-// partir du générateur cryptographique sécurisé crypto/rand, puis
-// l'encode en chaîne hexadécimale (64 caractères) pour un usage simple
-// (ex: stockage dans une variable d'environnement).
+// GenerateSecret generates a random 32-byte (256-bit) secret using
+// the crypto/rand secure random generator, then encodes it as a
+// hexadecimal string (64 characters) for simple usage (e.g. storing
+// it in an environment variable).
 func GenerateSecret() (string, error) {
 	b := make([]byte, 32)
 	rand.Read(b)

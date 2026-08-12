@@ -1,5 +1,5 @@
-// Package config charge la configuration de l'application depuis des
-// fichiers .env et l'expose sous forme de structure typée (Config).
+// Package config loads the application configuration from .env files
+// and exposes it as a typed struct (Config).
 package config
 
 import (
@@ -9,23 +9,23 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Config regroupe les paramètres de configuration nécessaires au
-// démarrage de l'application (accès base de données, port d'écoute).
+// Config groups the configuration parameters needed to start the
+// application (database access, listen port).
 type Config struct {
-	// DatabaseURL est le DSN utilisé pour les requêtes applicatives normales.
+	// DatabaseURL is the DSN used for normal application queries.
 	DatabaseURL string
-	// DatabaseURLMigration est le DSN utilisé spécifiquement pour exécuter
-	// les migrations (peut nécessiter des droits différents de DatabaseURL).
+	// DatabaseURLMigration is the DSN used specifically to run
+	// migrations (may require different privileges than DatabaseURL).
 	DatabaseURLMigration string
-	// Port est le port sur lequel le serveur HTTP écoute.
+	// Port is the port the HTTP server listens on.
 	Port string
 }
 
-// NewConfig charge le fichier .env à la racine du projet et construit
-// la configuration de production à partir des variables d'environnement.
+// NewConfig loads the .env file at the project root and builds the
+// production configuration from environment variables.
 func NewConfig() (*Config, error) {
-	// "../../.env" est résolu relativement au répertoire de travail du
-	// processus au moment de l'exécution, pas au dossier de ce fichier.
+	// "../../.env" is resolved relative to the process's working
+	// directory at runtime, not relative to this file's directory.
 	err := godotenv.Load("../../.env")
 	if err != nil {
 		return nil, errors.New("cannot load	.env file")
@@ -37,9 +37,9 @@ func NewConfig() (*Config, error) {
 	}, nil
 }
 
-// NewConfigTest charge le fichier .env.test et construit une configuration
-// dédiée aux tests, isolée de la configuration de production (base de
-// données de test, DSN de migration de test).
+// NewConfigTest loads the .env.test file and builds a configuration
+// dedicated to tests, isolated from the production configuration
+// (test database, test migration DSN).
 func NewConfigTest() (*Config, error) {
 	err := godotenv.Load("../../.env.test")
 	if err != nil {

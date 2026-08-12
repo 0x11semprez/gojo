@@ -9,37 +9,40 @@ import (
 	"gojo/internal/config"
 
 	"github.com/golang-migrate/migrate/v4"
-	// Imports anonymes (effets de bord uniquement) : ces deux packages
-	// enregistrent leurs drivers auprès de golang-migrate (destination
-	// "postgres" et source "file"), sans qu'on appelle directement
-	// une fonction exportée du package.
+	// Anonymous imports (side effects only): these two packages
+	// register their drivers with golang-migrate (destination
+	// "postgres" and source "file"), without us directly calling
+	// an exported function from the package.
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-// StartMigrations applique les migrations de base de données en attente
-// (fichiers SQL du dossier internal/database/migrations) à l'aide de
-// golang-migrate. Elle est appelée au démarrage de l'application
-// (voir cmd/main.go) pour garantir que le schéma est à jour.
-// En cas d'échec, elle arrête le processus (log.Fatal), car démarrer
-// avec un schéma désynchronisé serait dangereux.
+// StartMigrations applies the pending database migrations
+// (SQL files from the internal/database/migrations folder) using
+// golang-migrate. It is called at application startup
+// (see cmd/main.go) to guarantee the schema is up to date.
+// On failure, it stops the process (log.Fatal), since starting
+// with an out-of-sync schema would be dangerous.
 func StartMigrations(cfg *config.Config) {
-	// "file://migrations" est résolu par rapport au répertoire de travail du
-	// processus, qui dépend de l'endroit où `go run`/le binaire est lancé et
-	// ne pointe donc pas de façon fiable vers internal/database/migrations.
-	// On ancre le chemin à ce fichier source pour que les migrations soient
-	// trouvées quel que soit le répertoire courant.
+	// "file://migrations" is resolved relative to the process's
+	// working directory, which depends on where `go run`/the binary
+	// is launched from and therefore does not reliably point to
+	// internal/database/migrations. We anchor the path to this
+	// source file so migrations are found regardless of the current
+	// working directory.
 	_, thisFile, _, _ := runtime.Caller(0)
 	migrationsDir := filepath.Join(filepath.Dir(thisFile), "migrations")
 
 	migration, err := migrate.New("file://"+migrationsDir, cfg.DatabaseURLMigration)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to initialize database migrations: %v", err)
 	}
 
-	// migrate.ErrNoChange n'est pas une vraie erreur : elle signifie
-	// simplement qu'il n'y avait aucune migration en attente à appliquer.
+	// migrate.ErrNoChange is not a real error: it simply means there
+	// was no pending migration to apply.
 	if err := migration.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		log.Fatal(err)
+		log.Fatalf("failed to apply database migrations: %v", err)
 	}
+
+	log.Println("database migrations applied successfully")
 }

@@ -1,5 +1,5 @@
-// Package middleware fournit les fonctions liées à l'authentification :
-// hachage des mots de passe et vérification des identifiants (login).
+// Package middleware provides authentication-related functions:
+// password hashing and credential verification (login).
 package middleware
 
 import (
@@ -11,34 +11,32 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// ErrInvalidCredentials est retournée quand le nom d'utilisateur n'existe pas
-// ou que le mot de passe ne correspond pas. Les deux cas retournent
-// volontairement la même erreur, pour qu'un appelant (ou un attaquant) ne
-// puisse pas s'en servir pour deviner quels noms d'utilisateur existent.
+// ErrInvalidCredentials is returned when the username does not exist
+// or the password does not match. Both cases deliberately return the
+// same error, so that a caller (or an attacker) cannot use it to
+// guess which usernames exist.
 var ErrInvalidCredentials = errors.New("invalid username or password")
 
-// HashPassword transforme un mot de passe en clair en un hash bcrypt,
-// qui peut être stocké en base de données sans risque (colonne "secret",
-// de type BYTEA, dans la table users). bcrypt intègre un sel aléatoire
-// dans son résultat, donc hacher deux fois le même mot de passe ne
-// produit jamais les mêmes octets.
+// HashPassword turns a plaintext password into a bcrypt hash, which
+// can be safely stored in the database (the "secret" BYTEA column in
+// the users table). bcrypt embeds a random salt in its result, so
+// hashing the same password twice never produces the same bytes.
 func HashPassword(password string) ([]byte, error) {
 	return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 }
 
-// Login vérifie un couple nom d'utilisateur/mot de passe par rapport à la
-// base de données et retourne l'id de l'utilisateur correspondant en cas
-// de succès.
+// Login verifies a username/password pair against the database and
+// returns the matching user's id on success.
 func Login(ctx context.Context, db *bun.DB, username, password string) (string, error) {
 	var (
 		id   string
 		hash []byte
 	)
 
-	// Un seul aller-retour en base : on récupère l'id et le hash bcrypt
-	// stocké pour ce nom d'utilisateur. On interroge directement la table
-	// plutôt que le modèle user.User pour éviter un cycle d'import
-	// (le package user importe déjà middleware).
+	// A single database round trip: fetch the id and the bcrypt hash
+	// stored for this username. We query the table directly rather
+	// than the user.User model to avoid an import cycle (the user
+	// package already imports middleware).
 	err := db.NewSelect().
 		Table("users").
 		Column("id", "secret").
@@ -53,9 +51,9 @@ func Login(ctx context.Context, db *bun.DB, username, password string) (string, 
 		return "", err
 	}
 
-	// CompareHashAndPassword re-hache le mot de passe fourni avec le sel
-	// extrait du hash stocké et compare le résultat en temps constant,
-	// ce qui protège contre les attaques par mesure de temps (timing attacks).
+	// CompareHashAndPassword re-hashes the provided password with the
+	// salt extracted from the stored hash and compares the result in
+	// constant time, which protects against timing attacks.
 	if err := bcrypt.CompareHashAndPassword(hash, []byte(password)); err != nil {
 		return "", ErrInvalidCredentials
 	}

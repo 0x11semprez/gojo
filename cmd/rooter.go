@@ -1,4 +1,4 @@
-// Package main (fichier rooter.go) est réservé à la configuration du
-// routage HTTP de l'application. Il est actuellement vide : les routes
-// ne sont pas encore déclarées ici.
+// Package main (rooter.go file) is reserved for the HTTP routing
+// configuration of the application. It is currently empty: routes
+// are not declared here yet.
 package main

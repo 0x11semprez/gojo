@@ -13,9 +13,9 @@ import (
 	"gojo/internal/user"
 )
 
-// idForUsername recherche l'id d'un utilisateur non supprimé à partir de
-// son nom d'utilisateur ; utilisé pour retrouver les comptes "toj" et
-// "coeurco" créés par TestCreateUser.
+// idForUsername looks up the id of a non-deleted user from their
+// username; used to find the "toj" and "coeurco" accounts created by
+// TestCreateUser.
 func idForUsername(t *testing.T, testApp *app.App, username string) string {
 	t.Helper()
 
@@ -32,18 +32,17 @@ func idForUsername(t *testing.T, testApp *app.App, username string) string {
 	return id
 }
 
-// TestDeleteUser est un test d'intégration qui démarre une vraie App
-// contre la base de données de test et exerce user.DeleteUser sur : le
-// compte "toj" (créé par TestCreateUser, et déjà utilisé par TestLogin à
-// ce stade), le compte "coeurco" (créé par TestCreateUser avec un mot de
-// passe vide), un compte déjà supprimé, et un id de compte qui n'a jamais
-// existé.
+// TestDeleteUser is an integration test that starts a real App
+// against the test database and exercises user.DeleteUser on: the
+// "toj" account (created by TestCreateUser, and already used by
+// TestLogin at this point), the "coeurco" account (created by
+// TestCreateUser with an empty password), an already deleted account,
+// and an account id that never existed.
 //
-// DeleteUser est une suppression logique (soft delete) qui ne met à jour
-// que les lignes où deleted_at IS NULL ; avec l'implémentation actuelle,
-// elle ne retourne donc pas d'erreur quand 0 ligne correspond -- supprimer
-// un compte déjà supprimé ou inconnu est une opération silencieuse
-// (no-op), pas un échec.
+// DeleteUser is a soft delete that only updates rows where
+// deleted_at IS NULL; with the current implementation, it therefore
+// does not return an error when 0 rows match -- deleting an already
+// deleted or unknown account is a silent no-op, not a failure.
 func TestDeleteUser(t *testing.T) {
 	cfg, err := config.NewConfigTest()
 	if err != nil {

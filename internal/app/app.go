@@ -1,6 +1,6 @@
-// Package app regroupe les dépendances centrales de l'application
-// (serveur HTTP, connexion base de données, configuration) dans une
-// seule structure, injectée ensuite aux handlers métier (ex: package user).
+// Package app groups the core dependencies of the application
+// (HTTP server, database connection, configuration) into a single
+// struct, which is then injected into the business handlers (e.g. the user package).
 package app
 
 import (
@@ -10,17 +10,17 @@ import (
 	"github.com/uptrace/bun"
 )
 
-// App est le conteneur de dépendances de l'application. Il permet de
-// passer aux handlers un accès unique au serveur, à la base et à la config,
-// plutôt que de multiplier les paramètres.
+// App is the application's dependency container. It lets handlers
+// receive a single access point to the server, the database and the
+// config, instead of multiplying parameters.
 type App struct {
 	Server   *server.Server
 	Database *bun.DB
 	Config   *config.Config
 }
 
-// NewApp construit une nouvelle instance d'App à partir des composants
-// déjà initialisés (serveur, base de données, configuration).
+// NewApp builds a new App instance from already initialized
+// components (server, database, configuration).
 func (a App) NewApp(s *server.Server, db *bun.DB, c *config.Config) *App {
 	return &App{
 		Server:   s,

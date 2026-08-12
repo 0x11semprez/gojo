@@ -1,5 +1,5 @@
-// Package server encapsule la configuration du serveur HTTP standard de
-// l'application (adresse d'écoute, délais d'expiration, routeur).
+// Package server encapsulates the standard HTTP server configuration
+// of the application (listen address, timeouts, router).
 package server
 
 import (
@@ -9,31 +9,30 @@ import (
 	"gojo/internal/config"
 )
 
-// Server enrobe http.Server. L'embarquement (composition) permet
-// d'appeler directement les méthodes de http.Server (ex: ListenAndServe)
-// sur une valeur de type Server, tout en gardant la possibilité
-// d'ajouter des champs/méthodes propres à l'application plus tard.
+// Server wraps http.Server. Embedding (composition) allows calling
+// http.Server methods directly (e.g. ListenAndServe) on a Server
+// value, while keeping the ability to add application-specific
+// fields/methods later.
 type Server struct {
 	*http.Server
 }
 
-// NewServe construit un Server prêt à démarrer, avec des délais
-// d'expiration (timeouts) définis pour éviter que des connexions lentes
-// ou inactives ne bloquent le serveur indéfiniment.
+// NewServe builds a Server ready to start, with timeouts configured
+// to prevent slow or idle connections from blocking the server indefinitely.
 func NewServe(c *config.Config, mux http.Handler) (*Server, error) {
 	return &Server{
 		&http.Server{
 			Addr:    c.Port,
 			Handler: mux,
-			// Délai maximum pour lire l'intégralité de la requête (corps inclus).
+			// Maximum duration to read the entire request (body included).
 			ReadTimeout: 5 * time.Second,
-			// Délai maximum pour lire uniquement les en-têtes de la requête.
+			// Maximum duration to read only the request headers.
 			ReadHeaderTimeout: 2 * time.Second,
-			// Délai maximum pour écrire la réponse.
+			// Maximum duration to write the response.
 			WriteTimeout: 5 * time.Second,
-			// Délai avant fermeture d'une connexion keep-alive inactive.
+			// Duration before closing an idle keep-alive connection.
 			IdleTimeout: 60 * time.Second,
-			// Taille maximale des en-têtes de requête acceptés (1 Mo).
+			// Maximum size of accepted request headers (1 MB).
 			MaxHeaderBytes: 1 << 20,
 		},
 	}, nil
