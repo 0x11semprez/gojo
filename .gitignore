@@ -1,2 +1,5 @@
 # environement variables
 .env*
+
+# directory
+target/

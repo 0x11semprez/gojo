@@ -28,7 +28,7 @@ func NewConfig() (*Config, error) {
 	// directory at runtime, not relative to this file's directory.
 	err := godotenv.Load("../../.env")
 	if err != nil {
-		return nil, errors.New("cannot load	.env file")
+		return nil, errors.New("cannot load .env file")
 	}
 	return &Config{
 		DatabaseURL:          os.Getenv("DATABASE_URL"),
