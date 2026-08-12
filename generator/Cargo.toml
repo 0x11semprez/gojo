@@ -1,0 +1,9 @@
+[package]
+name = "generator"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+machine-info = "1.0.9"
+monero = "0.22.0"
+serde = "1.0.229"
