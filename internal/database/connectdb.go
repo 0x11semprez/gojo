@@ -1,3 +1,5 @@
+// Package database gère la connexion à PostgreSQL (via l'ORM Bun) ainsi
+// que l'exécution des migrations de schéma au démarrage de l'application.
 package database
 
 import (
@@ -12,56 +14,56 @@ import (
 	"github.com/uptrace/bun/driver/pgdriver"
 )
 
-// ConnectDB creates and configures a PostgreSQL database connection using Bun ORM.
+// ConnectDB crée et configure une connexion PostgreSQL en utilisant l'ORM Bun.
 //
-// It returns:
-//   - *bun.DB: the Bun database instance used for queries
-//   - error: an error if the configuration or connection setup fails
+// Elle retourne :
+//   - *bun.DB : l'instance Bun utilisée pour exécuter les requêtes
+//   - error : une erreur si la configuration ou la connexion échoue
 func ConnectDB(dsn *config.Config) (*bun.DB, error) {
-	// Check if the dsn instance exists.
-	// A nil pointer means no dsn configuration was provided.
+	// Vérifie que la configuration existe.
+	// Un pointeur nil signifie qu'aucune configuration n'a été fournie.
 	if dsn == nil {
 		return nil, errors.New("app is nil")
 	}
 
-	// Check if the databaseURL string is configured.
-	// The databaseURL contains information such as:
+	// Vérifie que l'URL de la base de données est renseignée.
+	// databaseURL contient des informations comme :
 	// postgres://user:password@host:port/database
 	if dsn.DatabaseURL == "" {
 		return nil, errors.New("database URL is empty")
 	}
 
-	// Create a standard SQL database connection using Bun's PostgreSQL driver.
-	// This does not immediately open a connection;
-	// connections are created lazily when queries are executed.
+	// Crée une connexion SQL standard en utilisant le driver PostgreSQL de Bun.
+	// Cela n'ouvre pas immédiatement de connexion réseau ;
+	// les connexions sont créées à la demande, lors de l'exécution des requêtes.
 	pgdb := sql.OpenDB(
 		pgdriver.NewConnector(
 			pgdriver.WithDSN(dsn.DatabaseURL),
 		),
 	)
 
-	// Configure the database connection pool.
+	// Configure le pool de connexions à la base de données.
 	//
-	// Maximum number of connections that can be opened at the same time.
+	// Nombre maximum de connexions pouvant être ouvertes simultanément.
 	pgdb.SetMaxOpenConns(25)
 
-	// Maximum number of idle (unused but ready) connections kept in the pool.
+	// Nombre maximum de connexions inactives (inutilisées mais prêtes) gardées dans le pool.
 	pgdb.SetMaxIdleConns(10)
 
-	// Close idle connections that have not been used for 5 minutes.
+	// Ferme les connexions inactives qui n'ont pas été utilisées depuis 5 minutes.
 	pgdb.SetConnMaxIdleTime(5 * time.Minute)
 
-	// Recycle connections after 25 minutes.
-	// This prevents keeping old or unhealthy connections forever.
+	// Recycle les connexions après 25 minutes.
+	// Cela évite de conserver indéfiniment des connexions anciennes ou instables.
 	pgdb.SetConnMaxLifetime(25 * time.Minute)
 
-	// Create the Bun ORM instance.
-	// Bun will use PostgreSQL dialect to generate SQL queries.
+	// Crée l'instance de l'ORM Bun.
+	// Bun utilisera le dialecte PostgreSQL pour générer les requêtes SQL.
 	db := bun.NewDB(
 		pgdb,
 		pgdialect.New(),
 	)
 
-	// Return the configured database instance.
+	// Retourne l'instance de base de données configurée.
 	return db, nil
 }
