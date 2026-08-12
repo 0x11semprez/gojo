@@ -13,7 +13,7 @@ architecture: </br>
 - postgres: keeps the encrypted keys and the accounts </br>
 - golang api: handles accounts and authentication, stores/serves keys, always encrypted </br>
 - rust: generates the keys (bitcoin secp256k1, monero ed25519), collecting multiple hardware entropy sources before seeding </br>
-  </br>
-  no need to have a long readme, just check all schemas in the docs files. we focused more on design system because coding skills are not as valuable in the eyes of others anymore... </br>
-  </br>
-  we love coding
+</br>
+no need to have a long readme, just check all schemas in the docs files. we focused more on design system because coding skills are not as valuable in the eyes of others anymore... </br>
+</br>
+we love create
