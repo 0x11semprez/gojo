@@ -1,5 +1,6 @@
 # environement variables
 .env*
+!.env.example
 
 # directory
 target/
