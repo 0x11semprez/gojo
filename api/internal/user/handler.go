@@ -1,17 +1,19 @@
 // Package user contains the business logic and HTTP handlers related
-// to users: account creation, account deletion and service health
-// check (Health).
+// to users: account creation, account update, account deletion and
+// service health check (Health).
 package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"gojo/internal/app"
+	"gojo/internal/cryptography/secret"
+	"gojo/internal/httpx"
+	"gojo/internal/middleware"
 	"log"
 	"net/http"
 	"time"
-
-	"gojo/internal/app"
-	"gojo/internal/middleware"
 )
 
 // Health is a simple HTTP handler ("healthcheck") that reports the
@@ -44,6 +46,41 @@ func CreateUser(db *app.App, username, password string) (string, error) {
 	return user.Id, nil
 }
 
+// UpdateUser updates an existing account's username and/or password
+// (a new bcrypt hash is computed when a password is given; the
+// plaintext never reaches the database or the logs). Passing both
+// fields empty is rejected, since there would be nothing to update.
+// Like DeleteUser, the underlying query only touches rows where
+// deleted_at IS NULL and is a silent no-op if id does not match any
+// such row.
+func UpdateUser(db *app.App, id, username, password string) error {
+	if username == "" && password == "" {
+		return errors.New("nothing to update: username and password are both empty")
+	}
+
+	ctx := context.Background()
+
+	q := db.Database.NewUpdate().
+		Model((*User)(nil)).
+		Where("id = ?", id).
+		Where("deleted_at IS NULL").
+		Set("updated_at = ?", time.Now())
+
+	if username != "" {
+		q = q.Set("username = ?", username)
+	}
+	if password != "" {
+		hash, err := middleware.HashPassword(password)
+		if err != nil {
+			return fmt.Errorf("cannot hash password: %w", err)
+		}
+		q = q.Set("secret = ?", hash)
+	}
+
+	_, err := q.Exec(ctx)
+	return err
+}
+
 // DeleteUser soft-deletes an account by its id: it sets deleted_at
 // instead of removing the row, consistent with the deleted_at column
 // and with middleware.Login, which already excludes rows where
@@ -59,4 +96,161 @@ func DeleteUser(db *app.App, id string) error {
 		Exec(ctx)
 
 	return err
+}
+
+// createUserRequest is the JSON body expected by CreateUserHandler.
+type createUserRequest struct {
+	Username string `json:"username"`
+}
+
+// createUserResponse is the JSON body returned by CreateUserHandler.
+// Password is only ever present in this one response: the server
+// keeps its bcrypt hash and cannot recover the plaintext afterwards,
+// so losing this response means losing the password permanently.
+type createUserResponse struct {
+	Id       string `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// CreateUserHandler handles "POST /users". The caller supplies only
+// a username: the password is generated server-side (see package
+// cryptography/secret) instead of being chosen by the client.
+func CreateUserHandler(a *app.App) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req createUserRequest
+		if err := httpx.DecodeJSON(r, &req); err != nil {
+			httpx.WriteError(w, http.StatusBadRequest, "invalid JSON body")
+			return
+		}
+		if req.Username == "" {
+			httpx.WriteError(w, http.StatusBadRequest, "username is required")
+			return
+		}
+
+		password, err := secret.GenerateSecret()
+		if err != nil {
+			log.Printf("create user: generate password: %v", err)
+			httpx.WriteError(w, http.StatusInternalServerError, "cannot create user")
+			return
+		}
+
+		id, err := CreateUser(a, req.Username, password)
+		if err != nil {
+			if httpx.IsConflict(err) {
+				httpx.WriteError(w, http.StatusConflict, "username already taken")
+				return
+			}
+			log.Printf("create user: %v", err)
+			httpx.WriteError(w, http.StatusInternalServerError, "cannot create user")
+			return
+		}
+
+		httpx.WriteJSON(w, http.StatusCreated, createUserResponse{
+			Id:       id,
+			Username: req.Username,
+			Password: password,
+		})
+	}
+}
+
+// updateUserRequest is the JSON body expected by UpdateUserHandler.
+// Fields left empty are not modified.
+type updateUserRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// UpdateUserHandler handles "PATCH /users/{id}".
+func UpdateUserHandler(a *app.App) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		if id == "" {
+			httpx.WriteError(w, http.StatusBadRequest, "id is required")
+			return
+		}
+
+		var req updateUserRequest
+		if err := httpx.DecodeJSON(r, &req); err != nil {
+			httpx.WriteError(w, http.StatusBadRequest, "invalid JSON body")
+			return
+		}
+		if req.Username == "" && req.Password == "" {
+			httpx.WriteError(w, http.StatusBadRequest, "at least one of username or password is required")
+			return
+		}
+
+		if err := UpdateUser(a, id, req.Username, req.Password); err != nil {
+			if httpx.IsConflict(err) {
+				httpx.WriteError(w, http.StatusConflict, "username already taken")
+				return
+			}
+			log.Printf("update user %s: %v", id, err)
+			httpx.WriteError(w, http.StatusInternalServerError, "cannot update user")
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+// loginRequest is the JSON body expected by LoginHandler.
+type loginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// loginResponse is the JSON body returned by LoginHandler on success.
+type loginResponse struct {
+	Id string `json:"id"`
+}
+
+// LoginHandler handles "POST /login": it verifies the given
+// username/password pair (see middleware.Login) and returns the
+// matching user's id, which the client then uses to authenticate
+// further requests (e.g. POST /wallets).
+func LoginHandler(a *app.App) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req loginRequest
+		if err := httpx.DecodeJSON(r, &req); err != nil {
+			httpx.WriteError(w, http.StatusBadRequest, "invalid JSON body")
+			return
+		}
+		if req.Username == "" || req.Password == "" {
+			httpx.WriteError(w, http.StatusBadRequest, "username and password are required")
+			return
+		}
+
+		id, err := middleware.Login(r.Context(), a.Database, req.Username, req.Password)
+		if err != nil {
+			if errors.Is(err, middleware.ErrInvalidCredentials) {
+				httpx.WriteError(w, http.StatusUnauthorized, "invalid username or password")
+				return
+			}
+			log.Printf("login: %v", err)
+			httpx.WriteError(w, http.StatusInternalServerError, "cannot login")
+			return
+		}
+
+		httpx.WriteJSON(w, http.StatusOK, loginResponse{Id: id})
+	}
+}
+
+// DeleteUserHandler handles "DELETE /users/{id}".
+func DeleteUserHandler(a *app.App) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		if id == "" {
+			httpx.WriteError(w, http.StatusBadRequest, "id is required")
+			return
+		}
+
+		if err := DeleteUser(a, id); err != nil {
+			log.Printf("delete user %s: %v", id, err)
+			httpx.WriteError(w, http.StatusInternalServerError, "cannot delete user")
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
 }
