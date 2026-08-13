@@ -4,12 +4,12 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
+	"gojo/internal/app"
 	"gojo/internal/config"
 	"gojo/internal/database"
 	"gojo/internal/server"
+	"log"
+	"net/http"
 )
 
 func main() {
@@ -30,6 +30,16 @@ func main() {
 	// Apply database migrations at startup, to guarantee the schema
 	// is up to date before serving any request.
 	database.StartMigrations(cfg)
+
+	db, err := database.ConnectDB(cfg)
+	if err != nil {
+		log.Fatalf("failed to connect to the database: %v", err)
+	}
+
+	// a is the dependency container injected into every HTTP handler
+	// (see cmd/rooter.go).
+	a := app.App{}.NewApp(srv, db, cfg)
+	registerRoutes(mux, a)
 
 	log.Printf("server is running and listening on %s", cfg.Port)
 
