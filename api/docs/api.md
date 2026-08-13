@@ -25,4 +25,8 @@ sequenceDiagram
     A-->>C: {id, public_key, address}
 ```
 
-The password is never chosen by a human: it is generated server-side, 256 bits of `crypto/rand`, so brute-forcing it is not a realistic attack. Only its bcrypt hash is stored — one-way, so the server itself cannot recompute the wallet-encryption key without the client sending the password again on each request. See [entropy.md](entropy.md) for how the key material itself is generated, and [database-rbac.md](database-rbac.md) for who can read what in Postgres.
+The password is never chosen by a human: it is generated server-side, 256 bits of `crypto/rand`, so brute-forcing it is not a realistic attack. Only its bcrypt hash is stored — one-way, so the server itself cannot recompute the wallet-encryption key without the client sending the password again on each request.
+
+Every wallet gets its own random salt, stored right next to it (it isn't secret). Its job isn't to hide anything by itself — it's to make sure two wallets under the same account, sharing the same password, never derive the same encryption key: each `POST /wallets` call draws a fresh salt, so compromising one wallet's key tells you nothing about the others.
+
+See [entropy.md](entropy.md) for how the key material itself is generated, and [database-rbac.md](database-rbac.md) for who can read what in Postgres.
