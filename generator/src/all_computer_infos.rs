@@ -1,7 +1,9 @@
 use machine_info::{Machine, Processor, SystemStatus};
 
 pub fn cpu_status(machine: &mut Machine) -> SystemStatus {
-    machine.system_status().expect("failed to read /proc/stat or /proc/meminfo")
+    machine
+        .system_status()
+        .expect("failed to read /proc/stat or /proc/meminfo")
 }
 
 pub fn cpu_info(machine: &mut Machine) -> Processor {
