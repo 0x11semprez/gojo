@@ -1,9 +1,9 @@
-use bitcoin::hashes::{sha256, Hash};
+use bitcoin::hashes::{Hash, sha256};
 use bitcoin::secp256k1::{Secp256k1, SecretKey};
 use bitcoin::{Address, CompressedPublicKey, Network, NetworkKind, PrivateKey};
 use machine_info::Machine;
-use rand::rngs::OsRng;
 use rand::RngCore;
+use rand::rngs::OsRng;
 
 use crate::all_computer_infos::cpu_info;
 
@@ -55,7 +55,6 @@ pub fn generate_private_key(machine: &mut Machine) -> BitcoinKeys {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -70,5 +69,4 @@ mod tests {
 
         assert_eq!(public_key, Ok(test1.public_key));
     }
-
 }
