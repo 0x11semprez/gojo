@@ -54,3 +54,21 @@ pub fn generate_private_key(machine: &mut Machine) -> BitcoinKeys {
         address,
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_generate_private_key() {
+        let mut machine = Machine::new();
+        let test1 = generate_private_key(&mut machine);
+        let private_key = test1.private_key;
+        let secp = Secp256k1::new();
+        let public_key = CompressedPublicKey::from_private_key(&secp, &private_key);
+
+        assert_eq!(public_key, Ok(test1.public_key));
+    }
+
+}
