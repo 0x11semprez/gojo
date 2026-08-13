@@ -8,6 +8,8 @@ gojo is a custodial KMS (key management service) for bitcoin and monero keys, ex
 gojo generates extremely secure keys by mixing several hardware-specific entropy sources in rust, instead of trusting a single RNG path. </br>
 gojo is gojo </br>
 </br>
+gojo is designed to be used as a white-label infrastructure layer: it handles account management and key generation, while the integrator owns branding, marketing, the frontend experience, and wallet operations. </br>
+</br>
 architecture: </br>
 
 - postgres: keeps the encrypted keys and the accounts </br>
