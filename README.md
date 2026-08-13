@@ -64,5 +64,6 @@ no need to have a long readme, just check all schemas in the docs files. we focu
 - [database-rbac.md](api/docs/database-rbac.md) -- the two Postgres roles and what each can do
 - [entropy.md](api/docs/entropy.md) -- how the rust generator seeds its keys
 - [api.md](api/docs/api.md) -- login, server-generated passwords, wallet-key encryption
+- [ci.md](api/docs/ci.md) -- what runs on every push
 
 we love create
