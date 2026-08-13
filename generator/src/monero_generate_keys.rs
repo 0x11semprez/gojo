@@ -1,7 +1,7 @@
 use machine_info::Machine;
 use monero::{Hash, PrivateKey, PublicKey};
-use rand::rngs::OsRng;
 use rand::RngCore;
+use rand::rngs::OsRng;
 
 use crate::all_computer_infos::cpu_info;
 
@@ -40,10 +40,10 @@ pub fn generate_private_key(machine: &mut Machine) -> MoneroKeys {
 }
 
 #[cfg(test)]
-
 mod tests {
     use super::*;
 
+    #[test]
     fn test_generate_private_key() {
         let mut machine = Machine::new();
         let test2 = generate_private_key(&mut machine);
@@ -51,6 +51,6 @@ mod tests {
         let private_key = test2.private_spend_key;
         let public_key = PublicKey::from_private_key(&private_key);
 
-        assert_eq!(public_key, test2.public_spend_key );
+        assert_eq!(public_key, test2.public_spend_key);
     }
 }
